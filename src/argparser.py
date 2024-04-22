@@ -18,4 +18,5 @@ class Parser:
         if self.options.version:
             print(VERSION_INFO)
             exit(0)
+            
 

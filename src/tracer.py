@@ -79,4 +79,3 @@ class Tracer:
             sys.setprofile(self.old_trace)
             self.xes_writer.write()
     
-    

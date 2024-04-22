@@ -14,4 +14,3 @@ if __name__ == "__main__":
                     output_file=output_file, trace_name=trace_name)
     tracer.start_tracing()
     
-    
