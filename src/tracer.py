@@ -41,10 +41,10 @@ class Tracer:
         info = inspect.getframeinfo(frame)
         if info.function == "<module>":
             self.print_verbose("module", info.filename)
-            self.xes_writer.generate_event("module", info.filename, timestamp=datetime.now())
+            self.xes_writer.generate_event("module", info.filename, info.lineno, timestamp=datetime.now())
         else:
             self.print_verbose("call", info.function)
-            self.xes_writer.generate_event("call", info.function, timestamp=datetime.now())
+            self.xes_writer.generate_event("call", info.function, info.lineno, timestamp=datetime.now())
         self.stack_len += 1
             
     def _return_callback(self, frame: Frame, arg: Any) -> None:
@@ -52,16 +52,16 @@ class Tracer:
         info = inspect.getframeinfo(frame)
         if info.function == "<module>":
             self.print_verbose("module_return", info.filename)
-            self.xes_writer.generate_event("module_return", info.filename, timestamp=datetime.now())
+            self.xes_writer.generate_event("module_return", info.filename, info.lineno, timestamp=datetime.now())
         else:
             self.print_verbose("return", info.function + " " + str(arg))
-            self.xes_writer.generate_event("return", info.function, timestamp=datetime.now())
+            self.xes_writer.generate_event("return", info.function, info.lineno, timestamp=datetime.now())
     
     def _c_call_callback(self, frame: Frame, arg: Any) -> None:
         info = inspect.getframeinfo(frame)
         if info.filename != self.tracer_filename:
             self.print_verbose("c_call", str(arg))
-            self.xes_writer.generate_event("c_call", arg, timestamp=datetime.now())
+            self.xes_writer.generate_event("c_call", arg, info.lineno, timestamp=datetime.now())
             self.stack_len += 1
     
     def _c_return_callback(self, frame: Frame, arg: Any) -> None:
@@ -69,7 +69,7 @@ class Tracer:
         if info.filename != self.tracer_filename:
             self.stack_len -= 1
             self.print_verbose("c_return", str(arg))
-            self.xes_writer.generate_event("c_return", arg, timestamp=datetime.now())
+            self.xes_writer.generate_event("c_return", arg, info.lineno, timestamp=datetime.now())
         
     def _start(self) -> None:
         try:
