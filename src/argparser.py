@@ -1,8 +1,9 @@
 from texts.texts import VERSION_INFO, HELP
 import argparse
+from patterns.singleton import Singleton
 from typing import Any, Dict, List, Optional, Tuple
 
-class Parser:
+class Parser(metaclass=Singleton):
     def __init__(self) -> None:
         self.parser = argparse.ArgumentParser(prog="python3 main.py")
         self.parser.add_argument("--version", action="store_true", default=False, help=HELP["version"])
