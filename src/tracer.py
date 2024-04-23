@@ -9,7 +9,7 @@ from datetime import datetime
 
 class Tracer:
     def __init__(self, filename: str, verbose: bool = False, writing_mode: str = "CREATE",
-                 output_file: str = "output.xes", trace_name: str = "trace") -> None:
+                 output_file: str = "output.xes", trace_name: str = "trace", ignore_builtins: bool = False) -> None:
         with open(filename, "r") as f:
             self.program = f.read()
             self.code = compile(self.program, filename, "exec")
@@ -18,6 +18,7 @@ class Tracer:
         self.stack_len = 0
         self.tracer_filename = os.getcwd() + '/' + TRACER_NAME
         self.xes_writer = XesWriter(writing_mode=writing_mode, output_file=output_file, trace_name=trace_name)
+        self.ignore_builtins = ignore_builtins
     
     def start_tracing(self) -> None:
         self._start()
@@ -31,9 +32,9 @@ class Tracer:
             self._call_callback(frame)
         elif event == "return":
             self._return_callback(frame, arg)
-        elif event == "c_call":
+        elif event == "c_call" and not self.ignore_builtins:
             self._c_call_callback(frame, arg)
-        elif event == "c_return":
+        elif event == "c_return" and not self.ignore_builtins:
             self._c_return_callback(frame, arg)
         return self._trace 
     

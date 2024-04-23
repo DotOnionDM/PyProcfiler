@@ -1,0 +1,6 @@
+{
+    "verbose": false,
+    "output_file": "output.xes",
+    "writing_mode": "CREATE",
+    "trace_name": "trace"
+}
