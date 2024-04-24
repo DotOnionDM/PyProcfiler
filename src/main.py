@@ -41,7 +41,7 @@ def invoke_tracer(parser: Parser) -> Tracer:
         raise Exception("alloc_step must be greater than or equal to 0")
     tracer = Tracer(parser.options.file, verbose=verbose, writing_mode=writing_mode, 
                     output_file=output_file, trace_name=trace_name, ignore_builtins=ignore_builtins,
-                    alloc_step=alloc_step, ignore_alloc=ignore_alloc)
+                    alloc_step=alloc_step, ignore_alloc=ignore_alloc, command=parser.command)
     return tracer
 
 if __name__ == "__main__":

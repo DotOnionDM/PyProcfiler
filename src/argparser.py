@@ -18,7 +18,7 @@ class Parser(metaclass=Singleton):
         self.parser.add_argument("file", help=HELP["file"])
         
     def parse(self, argv: List[str]) -> None:
-        self.options = self.parser.parse_args(argv[1:])
+        self.options, self.command = self.parser.parse_known_args(argv[1:])
         self.data = {}
         if self.options.version:
             print(VERSION_INFO)
