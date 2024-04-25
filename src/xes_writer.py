@@ -21,9 +21,9 @@ class XesWriter(metaclass=Singleton):
         self.trace = Trace()
         self.trace.attributes["concept:name"] = trace_name
         
-    def generate_event(self, concept_type: str, concept_name: str, lineno: int, timestamp: datetime = None) -> None:
+    def generate_event(self, concept_type: str, concept_name: str, filename: str, lineno: int, timestamp: datetime = None) -> None:
         event = Event()
-        event["concept:name"] = f"{concept_type}: {concept_name} lineno: {lineno}"
+        event["concept:name"] = f"{concept_type}: {concept_name} file: {filename} lineno: {lineno}"
         if timestamp is not None:
             event["time:timestamp"] = timestamp
         self.trace.append(event)

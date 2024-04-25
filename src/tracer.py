@@ -50,38 +50,39 @@ class Tracer:
     def _call_callback(self, frame: Frame) -> None:
         info = inspect.getframeinfo(frame)
         if info.function == "<module>":
-            self.print_verbose("module", info.filename)
-            self.xes_writer.generate_event("module", info.filename, info.lineno, timestamp=datetime.now())
+            self.print_verbose("module", f"{info.function} file: {info.filename}")
+            self.xes_writer.generate_event("module", info.function, info.filename, info.lineno, timestamp=datetime.now())
         else:
-            self.print_verbose("call", info.function)
-            self.xes_writer.generate_event("call", info.function, info.lineno, timestamp=datetime.now())
+            self.print_verbose("call", f"{info.function} file: {info.filename}")
+            self.xes_writer.generate_event("call", info.function, info.filename, info.lineno, timestamp=datetime.now())
         self.stack_len += 1
             
     def _return_callback(self, frame: Frame, arg: Any) -> None:
         self.stack_len -= 1
         info = inspect.getframeinfo(frame)
         if info.function == "<module>":
-            self.print_verbose("module_return", info.filename)
-            self.xes_writer.generate_event("module_return", info.filename, info.lineno, timestamp=datetime.now())
+            self.print_verbose("module_return", f"{info.function} file: {info.filename}")
+            self.xes_writer.generate_event("module_return", info.function, info.filename, info.lineno, timestamp=datetime.now())
         else:
-            self.print_verbose("return", info.function)
-            self.xes_writer.generate_event("return", info.function, info.lineno, timestamp=datetime.now())
+            self.print_verbose("return", f"{info.function} file: {info.filename}")
+            self.xes_writer.generate_event("return", info.function, info.filename, info.lineno, timestamp=datetime.now())
     
     def _c_call_callback(self, frame: Frame, arg: Any) -> None:
         info = inspect.getframeinfo(frame)
         if info.filename != self.tracer_filename:
-            self.print_verbose("c_call", str(arg))
-            self.xes_writer.generate_event("c_call", arg, info.lineno, timestamp=datetime.now())
+            self.print_verbose("c_call", f"{str(arg)} file: {info.filename}")
+            self.xes_writer.generate_event("c_call", arg, info.filename, info.lineno, timestamp=datetime.now())
             self.stack_len += 1
     
     def _c_return_callback(self, frame: Frame, arg: Any) -> None:
         info = inspect.getframeinfo(frame)
         if info.filename != self.tracer_filename:
             self.stack_len -= 1
-            self.print_verbose("c_return", str(arg))
-            self.xes_writer.generate_event("c_return", arg, info.lineno, timestamp=datetime.now())
+            self.print_verbose("c_return", f"{str(arg)} file: {info.filename}")
+            self.xes_writer.generate_event("c_return", arg, info.filename, info.lineno, timestamp=datetime.now())
     
     def _alloc_trace(self, frame: Frame, event: str, arg: Any):
+        info = inspect.getframeinfo(frame)
         if event == 'line' and not self.ignore_alloc:
             # Смотрим на использование памяти
             snapshot = tracemalloc.take_snapshot()
@@ -91,17 +92,17 @@ class Tracer:
             # Проверка на объём изменения количества используемой памяти, чтобы не записывать лишнее
             if abs(self.memory_usage - sum_) > self.alloc_step:
                 if self.memory_usage > sum_:
-                    self.print_verbose("free", f"{self.memory_usage - sum_} in line {frame.f_lineno}")
-                    self.xes_writer.generate_event(f"free", f"{self.memory_usage - sum_}",
+                    self.print_verbose("free", f"{self.memory_usage - sum_} line: {frame.f_lineno} file: {info.filename}")
+                    self.xes_writer.generate_event(f"free", f"{self.memory_usage - sum_}", info.filename,
                                                    frame.f_lineno, timestamp=datetime.now())
                 else:
-                    self.print_verbose("alloc", f"{sum_ - self.memory_usage} in line {frame.f_lineno}")
-                    self.xes_writer.generate_event(f"alloc", f"{sum_ - self.memory_usage}",
+                    self.print_verbose("alloc", f"{sum_ - self.memory_usage} line: {frame.f_lineno} file: {info.filename}")
+                    self.xes_writer.generate_event(f"alloc", f"{sum_ - self.memory_usage}", info.filename,
                                                    frame.f_lineno, timestamp=datetime.now())
                 self.memory_usage = sum_
         if event == 'exception':
-            self.print_verbose("exception", arg[0])
-            self.xes_writer.generate_event("exception", arg[0], frame.f_lineno, timestamp=datetime.now())
+            self.print_verbose("exception", f"{arg[0]} file: {info.filename}")
+            self.xes_writer.generate_event("exception", arg[0], info.filename, frame.f_lineno, timestamp=datetime.now())
         return self._alloc_trace
         
     def _start(self) -> None:
